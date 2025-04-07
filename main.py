@@ -33,14 +33,22 @@ def generate_tag_cloud(keywords: str, output_path: str):
     """
     # Convertimos las palabras clave en texto plano
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
-    keywords_list = [kw for kw in keywords_list if kw]  # Filtramos palabras vacías
+    keywords_list = [kw.strip() for kw in keywords_list if kw.strip()]  # Filtramos palabras vacías y espacios
 
-    # Filtramos stop words y lematizamos
+    # Normalizamos las stop words (minúsculas y lematización)
+    normalized_stopwords = {lemmatizer.lemmatize(word.lower()) for word in CUSTOM_STOPWORDS}
+
+    # Filtramos stop words y lematizamos las palabras clave
     filtered_keywords = [
-        lemmatizer.lemmatize(word.lower())
+        lemmatizer.lemmatize(word.lower())  # Convertimos a minúsculas y lematizamos
         for word in keywords_list
-        if word.lower() not in CUSTOM_STOPWORDS
+        if lemmatizer.lemmatize(word.lower()) not in normalized_stopwords  # Comparamos con stop words normalizadas
     ]
+
+    # Verificamos si hay palabras clave después del filtrado
+    if not filtered_keywords:
+        print("Warning: No valid keywords after filtering. Skipping tag cloud generation.")
+        return
 
     # Unimos las palabras filtradas en un solo string
     keywords_text = " ".join(filtered_keywords)
@@ -53,7 +61,7 @@ def generate_tag_cloud(keywords: str, output_path: str):
     plt.tight_layout()
     plt.savefig(output_path, format="jpg")
     plt.close()
-    
+
 # Definimos el contenido del mensaje como una constante
 KEYWORDS_PROMPT = [
     "You are an expert in literature and books, particularly blurbs of classic works.",
