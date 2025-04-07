@@ -26,10 +26,16 @@ CUSTOM_STOPWORDS = set(stopwords.words('english')).union({
 # Lematizador
 lemmatizer = WordNetLemmatizer()
 
+# Lista de nombres propios comunes en español
+SPANISH_PROPER_NAMES = {
+    "miguel", "juan", "carlos", "maria", "jose", "pedro", "luis", "ana", "francisco", "antonio",
+    "manuel", "carmen", "javier", "rafael", "fernando", "diego", "alejandro", "pablo", "andres"
+}
+
 def generate_tag_cloud(keywords: str, output_path: str):
     """
     Genera una nube de palabras a partir de las palabras clave y guarda la imagen en el directorio especificado.
-    Filtra las stop words y lematiza las palabras clave.
+    Filtra las stop words, nombres propios y lematiza las palabras clave.
     """
     # Convertimos las palabras clave en texto plano
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
@@ -50,15 +56,16 @@ def generate_tag_cloud(keywords: str, output_path: str):
     # Normalizamos las stop words (minúsculas y lematización)
     normalized_stopwords = {lemmatizer.lemmatize(word.lower()) for word in CUSTOM_STOPWORDS}
 
-    # Filtramos stop words y lematizamos las palabras clave
+    # Filtramos stop words, nombres propios y lematizamos las palabras clave
     filtered_keywords = []
     for word in processed_keywords:
         if "-" in word:
-            # Dividimos la palabra en sus componentes y eliminamos stop words
+            # Dividimos la palabra en sus componentes y eliminamos stop words y nombres propios
             components = word.split("-")
             filtered_components = [
                 lemmatizer.lemmatize(w.lower()) for w in components
                 if lemmatizer.lemmatize(w.lower()) not in normalized_stopwords
+                and w.lower() not in SPANISH_PROPER_NAMES
             ]
             # Si quedan componentes válidos, los unimos con guiones
             if filtered_components:
@@ -67,7 +74,7 @@ def generate_tag_cloud(keywords: str, output_path: str):
         else:
             # Procesamos palabras sin guiones
             normalized_word = lemmatizer.lemmatize(word.lower())
-            if normalized_word not in normalized_stopwords:
+            if normalized_word not in normalized_stopwords and normalized_word not in SPANISH_PROPER_NAMES:
                 filtered_keywords.append(normalized_word)
 
     # Depuración: Imprimir listas para verificar el filtrado
