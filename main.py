@@ -1,6 +1,8 @@
 import os
 import openai
 from dotenv import load_dotenv
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 # Cargamos variables de entorno del archivo .env si existe.
 load_dotenv()
@@ -21,9 +23,9 @@ def extract_keywords(text: str) -> str:
                 "role": "system",
                 "content": (
                     "You are an expert in literature and books, particularly blurbs of classic works. "
-                    "You will be provided with a blurb of a famous book. Your task is to extract the "
-                    "significant keywords from the blurb, along with the author, era, literary genre, "
-                    "and other meaningful tags. The output tags should be in English, lowercase, and "
+                    "You will be provided with a blurb of a famous book. Your task is to extract: 1. the "
+                    "significant keywords from the blurb, "
+                    "and 2. other meaningful tags (for example: the author, era, literary genre, country, if it is a classic). The all output (keywords & tags) should be in English, lowercase, and "
                     "spaces should be replaced with hyphens."
                 )
             },
@@ -39,6 +41,24 @@ def extract_keywords(text: str) -> str:
     # El texto devuelto por el modelo:
     keywords = response["choices"][0]["message"]["content"].strip()
     return keywords
+
+def generate_tag_cloud(keywords: str, output_path: str):
+    """
+    Genera una nube de palabras a partir de las palabras clave y guarda la imagen en el directorio especificado.
+    """
+    # Convertimos las palabras clave en texto plano
+    # Extraemos solo las palabras clave después de "keywords:" y las unimos en un solo string
+    keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
+    keywords_text = " ".join(keywords_list)
+
+    # Generamos la nube de palabras
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(keywords_text)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.tight_layout()
+    plt.savefig(output_path, format="jpg")
+    plt.close()
 
 def main():
     # Aquí podrías tener la cadena de texto de entrada.
@@ -58,6 +78,12 @@ def main():
     # Imprimimos el resultado
     print("Extracted keywords:")
     print(extracted_keywords)
+
+    # Generamos la nube de palabras y la guardamos en el folder "img/"
+    output_path = "img/tag_cloud.jpg"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    generate_tag_cloud(extracted_keywords, output_path)
+    print(f"Tag cloud saved to {output_path}")
 
 if __name__ == "__main__":
     main()
