@@ -2,6 +2,48 @@
 
 Welcome to the **Keyword Extraction Project**, where we use the power of OpenAI's ChatCompletion API to extract keywords from any given text. This repository contains a simple Python script that demonstrates how to interact with the API and retrieve keywords efficiently.
 
+## 🖥️ Example Output
+
+When running the script, you will see the following output in the terminal:
+
+```plaintext
+🔑 **Extracted Keywords and Tags:**
+
+📌 **Keywords:**
+   - don-quixote
+   - miguel-de-cervantes
+   - literature
+   - nobleman
+   - chivalric-romances
+   - knight-errant
+   - sancho-panza
+   - windmills
+   - giants
+   - chivalry
+   - idealism
+   - reality
+   - human-condition
+   - western-literature
+
+🏷️ **Tags:**
+   - author: miguel-de-cervantes
+   - era: 1605
+   - literary-genre: classic
+   - country: spain
+
+📚 **Related Books:**
+   - "The Canterbury Tales" - Geoffrey Chaucer
+   - "Gulliver's Travels" - Jonathan Swift
+   - "Pilgrim's Progress" - John Bunyan
+   - "Robinson Crusoe" - Daniel Defoe
+   - "Moby-Dick" - Herman Melville
+
+🌥️ **Tag cloud saved to:** [tag_cloud.jpg](http://_vscodecontentref_/3)
+📊 **Bar chart saved to:** [keyword_bar_chart.jpg](http://_vscodecontentref_/4)
+🥧 **Pie chart saved to:** [tag_pie_chart.jpg](http://_vscodecontentref_/5)
+📈 **Scatter plot saved to:** [keyword_scatter_plot.jpg](http://_vscodecontentref_/6)
+```
+
 ## ✨ Features
 
 - **Keyword Extraction**: Provide a block of text, get back its main keywords.

@@ -190,37 +190,45 @@ def main():
 
     # Llamamos a la función para extraer palabras clave
     extracted_keywords = extract_keywords(input_text)
-    print("\nExtracted Keywords and Tags:")
-    print(extracted_keywords)  # Imprimimos los keywords y tags extraídos
+    print("\n🔑 **Extracted Keywords and Tags:**")
+    print("\n📌 **Keywords:**")
+    for keyword in extracted_keywords.split("keywords:")[-1].strip().split("\n- "):
+        if keyword:
+            print(f"   - {keyword}")
 
     # Extraemos los tags de los keywords
     tags = parse_tags_from_keywords(extracted_keywords)
+    print("\n🏷️ **Tags:**")
+    for key, value in tags.items():
+        print(f"   - {key}: {value}")
 
     # Llamamos a la función para obtener libros relacionados
     related_books = extract_related_books(input_text)
-    print("\nRelated Books:")
-    print(related_books)  # Imprimimos los libros relacionados
+    print("\n📚 **Related Books:**")
+    for book in related_books.split("\n"):
+        if book:
+            print(f"   - {book}")
 
     # Generamos la nube de palabras
     output_path_cloud = "img/tag_cloud.jpg"
     os.makedirs(os.path.dirname(output_path_cloud), exist_ok=True)
     generate_tag_cloud(extracted_keywords, output_path_cloud)
-    print(f"\nTag cloud saved to {output_path_cloud}")
+    print(f"\n🌥️ **Tag cloud saved to:** {output_path_cloud}")
 
     # Generamos la gráfica de barras
     output_path_bar = "img/keyword_bar_chart.jpg"
     generate_bar_chart(extracted_keywords, output_path_bar)
-    print(f"\nBar chart saved to {output_path_bar}")
+    print(f"\n📊 **Bar chart saved to:** {output_path_bar}")
 
     # Generamos la gráfica de pastel con los tags extraídos
     output_path_pie = "img/tag_pie_chart.jpg"
     generate_pie_chart(tags, output_path_pie)
-    print(f"\nPie chart saved to {output_path_pie}")
+    print(f"\n🥧 **Pie chart saved to:** {output_path_pie}")
 
     # Generamos scatter plot
     output_path_scatter = "img/keyword_scatter_plot.jpg"
     generate_scatter_plot(extracted_keywords, output_path_scatter)
-    print(f"\nScatter plot saved to {output_path_scatter}")
+    print(f"\n📈 **Scatter plot saved to:** {output_path_scatter}")
 
 if __name__ == "__main__":
     main()
