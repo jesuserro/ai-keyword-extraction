@@ -91,17 +91,20 @@ def extract_related_books(text: str) -> str:
 
 def generate_bar_chart(keywords: str, output_path: str):
     """
-    Genera una gráfica de barras con las palabras clave y guarda la imagen en el directorio especificado.
+    Genera una gráfica de barras con las palabras clave y sus frecuencias reales.
     """
     # Procesamos las palabras clave
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
     keywords_list = [kw for kw in keywords_list if kw]  # Filtramos palabras vacías
 
-    # Creamos un DataFrame con frecuencias ficticias (puedes usar datos reales si los tienes)
-    df = pd.DataFrame({'Keyword': keywords_list, 'Frequency': [1] * len(keywords_list)})
+    # Calculamos la frecuencia de cada palabra clave
+    keyword_counts = pd.Series(keywords_list).value_counts()
+
+    # Creamos un DataFrame con las frecuencias
+    df = pd.DataFrame({'Keyword': keyword_counts.index, 'Frequency': keyword_counts.values})
 
     # Generamos la gráfica de barras
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 6))
     df.plot(kind='bar', x='Keyword', y='Frequency', legend=False, color='skyblue')
     plt.title('Keyword Frequency')
     plt.xlabel('Keywords')
@@ -115,11 +118,16 @@ def generate_bar_chart(keywords: str, output_path: str):
 
 def generate_pie_chart(tags: dict, output_path: str):
     """
-    Genera una gráfica de pastel con las categorías extraídas y guarda la imagen en el directorio especificado.
+    Genera una gráfica de pastel con las categorías extraídas y sus pesos proporcionales.
     """
-    # Creamos etiquetas y valores
+    # Creamos etiquetas y valores basados en la longitud de los valores de los tags
     labels = list(tags.keys())
-    sizes = [1] * len(tags)  # Asignamos un valor ficticio de 1 a cada categoría
+    sizes = [len(value) for value in tags.values()]  # Usamos la longitud del valor como peso
+
+    # Validamos que no haya valores NaN o cero en sizes
+    if not sizes or sum(sizes) == 0:
+        print("Warning: No valid data for pie chart. Skipping generation.")
+        return
 
     # Generamos la gráfica de pastel
     plt.figure(figsize=(8, 8))
@@ -133,18 +141,18 @@ def generate_pie_chart(tags: dict, output_path: str):
 
 def generate_scatter_plot(keywords: str, output_path: str):
     """
-    Genera una gráfica de dispersión con las palabras clave y guarda la imagen en el directorio especificado.
+    Genera una gráfica de dispersión con las palabras clave y su relevancia basada en la longitud.
     """
     # Procesamos las palabras clave
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
     keywords_list = [kw for kw in keywords_list if kw]
 
-    # Creamos datos ficticios para la relevancia
+    # Creamos datos para la gráfica
     x = range(len(keywords_list))
-    y = [len(kw) for kw in keywords_list]  # Usamos la longitud de las palabras como ejemplo de relevancia
+    y = [len(kw) for kw in keywords_list]  # Usamos la longitud de las palabras como relevancia
 
     # Generamos la gráfica de dispersión
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 6))
     plt.scatter(x, y, color='blue', alpha=0.7)
     plt.title('Keyword Relevance')
     plt.xlabel('Keyword Index')
@@ -155,6 +163,17 @@ def generate_scatter_plot(keywords: str, output_path: str):
     # Guardamos la gráfica
     plt.savefig(output_path, format="jpg")
     plt.close()
+
+def parse_tags_from_keywords(keywords: str) -> dict:
+    """
+    Extrae los tags (author, era, literary-genre, etc.) de la salida de la IA.
+    """
+    tags = {}
+    for line in keywords.split("\n"):
+        if ":" in line:  # Busca líneas con formato "clave: valor"
+            key, value = line.split(":", 1)
+            tags[key.strip()] = value.strip()
+    return tags
 
 def main():
     # Aquí podrías tener la cadena de texto de entrada organizada en una lista legible.
@@ -174,6 +193,9 @@ def main():
     print("\nExtracted Keywords and Tags:")
     print(extracted_keywords)  # Imprimimos los keywords y tags extraídos
 
+    # Extraemos los tags de los keywords
+    tags = parse_tags_from_keywords(extracted_keywords)
+
     # Llamamos a la función para obtener libros relacionados
     related_books = extract_related_books(input_text)
     print("\nRelated Books:")
@@ -190,8 +212,7 @@ def main():
     generate_bar_chart(extracted_keywords, output_path_bar)
     print(f"\nBar chart saved to {output_path_bar}")
 
-    # Generamos la gráfica de pastel
-    tags = {"author": "miguel de cervantes", "era": "1605", "literary-genre": "novel", "classic": "yes"}
+    # Generamos la gráfica de pastel con los tags extraídos
     output_path_pie = "img/tag_pie_chart.jpg"
     generate_pie_chart(tags, output_path_pie)
     print(f"\nPie chart saved to {output_path_pie}")
