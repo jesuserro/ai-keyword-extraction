@@ -37,7 +37,6 @@ def generate_tag_cloud(keywords: str, output_path: str):
 
     # Eliminamos líneas no válidas como "### tags" o caracteres extraños
     keywords_list = [kw for kw in keywords_list if not kw.lower().startswith("###")]
-    keywords_list = [kw.replace("\n", "").strip() for kw in keywords_list]  # Eliminamos caracteres extraños como \n
 
     # Procesamos los valores de los tags para extraer solo el contenido después de ":"
     processed_keywords = []
@@ -54,15 +53,22 @@ def generate_tag_cloud(keywords: str, output_path: str):
     # Filtramos stop words y lematizamos las palabras clave
     filtered_keywords = []
     for word in processed_keywords:
-        # Mantener palabras con guiones como una sola unidad
         if "-" in word:
-            normalized_word = "-".join([lemmatizer.lemmatize(w.lower()) for w in word.split("-")])
+            # Dividimos la palabra en sus componentes y eliminamos stop words
+            components = word.split("-")
+            filtered_components = [
+                lemmatizer.lemmatize(w.lower()) for w in components
+                if lemmatizer.lemmatize(w.lower()) not in normalized_stopwords
+            ]
+            # Si quedan componentes válidos, los unimos con guiones
+            if filtered_components:
+                normalized_word = "-".join(filtered_components)
+                filtered_keywords.append(normalized_word)
         else:
+            # Procesamos palabras sin guiones
             normalized_word = lemmatizer.lemmatize(word.lower())
-
-        # Filtrar si la palabra normalizada no está en las stop words
-        if normalized_word not in normalized_stopwords:
-            filtered_keywords.append(normalized_word)
+            if normalized_word not in normalized_stopwords:
+                filtered_keywords.append(normalized_word)
 
     # Depuración: Imprimir listas para verificar el filtrado
     print(f"\nOriginal Keywords List: {keywords_list}")
