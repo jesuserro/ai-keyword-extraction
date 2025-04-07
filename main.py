@@ -36,7 +36,7 @@ def generate_tag_cloud(keywords: str, output_path: str):
     keywords_list = [kw.strip() for kw in keywords_list if kw.strip()]  # Filtramos palabras vacías y espacios
 
     # Eliminamos líneas no válidas como "### tags" o caracteres extraños
-    keywords_list = [kw for kw in keywords_list if not kw.lower().startswith("###")]
+    keywords_list = [kw.split("###")[0].strip() for kw in keywords_list if "###" not in kw.lower()]
 
     # Procesamos los valores de los tags para extraer solo el contenido después de ":"
     processed_keywords = []
