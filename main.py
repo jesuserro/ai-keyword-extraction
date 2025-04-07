@@ -3,6 +3,7 @@ import openai
 from dotenv import load_dotenv
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # Cargamos variables de entorno del archivo .env si existe.
 load_dotenv()
@@ -88,6 +89,73 @@ def extract_related_books(text: str) -> str:
     related_books = response["choices"][0]["message"]["content"].strip()
     return related_books
 
+def generate_bar_chart(keywords: str, output_path: str):
+    """
+    Genera una gráfica de barras con las palabras clave y guarda la imagen en el directorio especificado.
+    """
+    # Procesamos las palabras clave
+    keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
+    keywords_list = [kw for kw in keywords_list if kw]  # Filtramos palabras vacías
+
+    # Creamos un DataFrame con frecuencias ficticias (puedes usar datos reales si los tienes)
+    df = pd.DataFrame({'Keyword': keywords_list, 'Frequency': [1] * len(keywords_list)})
+
+    # Generamos la gráfica de barras
+    plt.figure(figsize=(10, 6))
+    df.plot(kind='bar', x='Keyword', y='Frequency', legend=False, color='skyblue')
+    plt.title('Keyword Frequency')
+    plt.xlabel('Keywords')
+    plt.ylabel('Frequency')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+
+    # Guardamos la gráfica
+    plt.savefig(output_path, format="jpg")
+    plt.close()
+
+def generate_pie_chart(tags: dict, output_path: str):
+    """
+    Genera una gráfica de pastel con las categorías extraídas y guarda la imagen en el directorio especificado.
+    """
+    # Creamos etiquetas y valores
+    labels = list(tags.keys())
+    sizes = [1] * len(tags)  # Asignamos un valor ficticio de 1 a cada categoría
+
+    # Generamos la gráfica de pastel
+    plt.figure(figsize=(8, 8))
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=plt.cm.Paired.colors)
+    plt.title('Tag Distribution')
+    plt.tight_layout()
+
+    # Guardamos la gráfica
+    plt.savefig(output_path, format="jpg")
+    plt.close()
+
+def generate_scatter_plot(keywords: str, output_path: str):
+    """
+    Genera una gráfica de dispersión con las palabras clave y guarda la imagen en el directorio especificado.
+    """
+    # Procesamos las palabras clave
+    keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
+    keywords_list = [kw for kw in keywords_list if kw]
+
+    # Creamos datos ficticios para la relevancia
+    x = range(len(keywords_list))
+    y = [len(kw) for kw in keywords_list]  # Usamos la longitud de las palabras como ejemplo de relevancia
+
+    # Generamos la gráfica de dispersión
+    plt.figure(figsize=(10, 6))
+    plt.scatter(x, y, color='blue', alpha=0.7)
+    plt.title('Keyword Relevance')
+    plt.xlabel('Keyword Index')
+    plt.ylabel('Relevance (Length)')
+    plt.xticks(x, keywords_list, rotation=45, ha='right')
+    plt.tight_layout()
+
+    # Guardamos la gráfica
+    plt.savefig(output_path, format="jpg")
+    plt.close()
+
 def main():
     # Aquí podrías tener la cadena de texto de entrada organizada en una lista legible.
     input_text = [
@@ -103,21 +171,35 @@ def main():
 
     # Llamamos a la función para extraer palabras clave
     extracted_keywords = extract_keywords(input_text)
-
-    # Imprimimos el resultado
-    print("------ OUTPUT ------")
-    print(extracted_keywords)
+    print("\nExtracted Keywords and Tags:")
+    print(extracted_keywords)  # Imprimimos los keywords y tags extraídos
 
     # Llamamos a la función para obtener libros relacionados
     related_books = extract_related_books(input_text)
-    print("\nRelated books:")
-    print(related_books)
+    print("\nRelated Books:")
+    print(related_books)  # Imprimimos los libros relacionados
 
-        # Generamos la nube de palabras y la guardamos en el folder "img/"
-    output_path = "img/tag_cloud.jpg"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    generate_tag_cloud(extracted_keywords, output_path)
-    print(f"\n\nTag cloud saved to {output_path}")
+    # Generamos la nube de palabras
+    output_path_cloud = "img/tag_cloud.jpg"
+    os.makedirs(os.path.dirname(output_path_cloud), exist_ok=True)
+    generate_tag_cloud(extracted_keywords, output_path_cloud)
+    print(f"\nTag cloud saved to {output_path_cloud}")
+
+    # Generamos la gráfica de barras
+    output_path_bar = "img/keyword_bar_chart.jpg"
+    generate_bar_chart(extracted_keywords, output_path_bar)
+    print(f"\nBar chart saved to {output_path_bar}")
+
+    # Generamos la gráfica de pastel
+    tags = {"author": "miguel de cervantes", "era": "1605", "literary-genre": "novel", "classic": "yes"}
+    output_path_pie = "img/tag_pie_chart.jpg"
+    generate_pie_chart(tags, output_path_pie)
+    print(f"\nPie chart saved to {output_path_pie}")
+
+    # Generamos scatter plot
+    output_path_scatter = "img/keyword_scatter_plot.jpg"
+    generate_scatter_plot(extracted_keywords, output_path_scatter)
+    print(f"\nScatter plot saved to {output_path_scatter}")
 
 if __name__ == "__main__":
     main()
