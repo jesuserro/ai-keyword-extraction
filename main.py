@@ -4,6 +4,13 @@ from dotenv import load_dotenv
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import pandas as pd
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import nltk
+
+# Descargar recursos de nltk
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 # Cargamos variables de entorno del archivo .env si existe.
 load_dotenv()
@@ -11,6 +18,42 @@ load_dotenv()
 # Configura tu API Key:
 openai.api_key = os.getenv("OPENAI_API_KEY")  # Alternativamente, puedes asignarla directamente aquí.
 
+# Stop words personalizadas
+CUSTOM_STOPWORDS = set(stopwords.words('english')).union({
+    "de", "don", "genre", "tags", "author", "era", "literature"
+})
+
+# Lematizador
+lemmatizer = WordNetLemmatizer()
+
+def generate_tag_cloud(keywords: str, output_path: str):
+    """
+    Genera una nube de palabras a partir de las palabras clave y guarda la imagen en el directorio especificado.
+    Filtra las stop words y lematiza las palabras clave.
+    """
+    # Convertimos las palabras clave en texto plano
+    keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
+    keywords_list = [kw for kw in keywords_list if kw]  # Filtramos palabras vacías
+
+    # Filtramos stop words y lematizamos
+    filtered_keywords = [
+        lemmatizer.lemmatize(word.lower())
+        for word in keywords_list
+        if word.lower() not in CUSTOM_STOPWORDS
+    ]
+
+    # Unimos las palabras filtradas en un solo string
+    keywords_text = " ".join(filtered_keywords)
+
+    # Generamos la nube de palabras
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(keywords_text)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.tight_layout()
+    plt.savefig(output_path, format="jpg")
+    plt.close()
+    
 # Definimos el contenido del mensaje como una constante
 KEYWORDS_PROMPT = [
     "You are an expert in literature and books, particularly blurbs of classic works.",
@@ -60,24 +103,6 @@ def extract_keywords(text: str) -> str:
     # El texto devuelto por el modelo:
     keywords = response["choices"][0]["message"]["content"].strip()
     return keywords
-
-def generate_tag_cloud(keywords: str, output_path: str):
-    """
-    Genera una nube de palabras a partir de las palabras clave y guarda la imagen en el directorio especificado.
-    """
-    # Convertimos las palabras clave en texto plano
-    # Extraemos solo las palabras clave después de "keywords:" y las unimos en un solo string
-    keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
-    keywords_text = " ".join(keywords_list)
-
-    # Generamos la nube de palabras
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(keywords_text)
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")
-    plt.tight_layout()
-    plt.savefig(output_path, format="jpg")
-    plt.close()
 
 # Definimos el contenido del mensaje como una constante
 SYSTEM_PROMPT = [
