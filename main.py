@@ -35,14 +35,11 @@ def generate_tag_cloud(keywords: str, output_path: str):
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
     keywords_list = [kw.strip() for kw in keywords_list if kw.strip()]  # Filtramos palabras vacías y espacios
 
-    # Normalizamos las stop words (minúsculas y lematización)
-    normalized_stopwords = {lemmatizer.lemmatize(word.lower()) for word in CUSTOM_STOPWORDS}
-
-    # Filtramos stop words y lematizamos las palabras clave
+    # Filtramos stop words y lematizamos
     filtered_keywords = [
         lemmatizer.lemmatize(word.lower())  # Convertimos a minúsculas y lematizamos
         for word in keywords_list
-        if lemmatizer.lemmatize(word.lower()) not in normalized_stopwords  # Comparamos con stop words normalizadas
+        if lemmatizer.lemmatize(word.lower()) not in CUSTOM_STOPWORDS  # Comparamos con stop words
     ]
 
     # Verificamos si hay palabras clave después del filtrado
