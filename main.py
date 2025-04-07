@@ -45,6 +45,11 @@ def generate_tag_cloud(keywords: str, output_path: str):
         if lemmatizer.lemmatize(word.lower()) not in normalized_stopwords  # Comparamos con stop words normalizadas
     ]
 
+    # Depuración: Imprimir listas para verificar el filtrado
+    print("Original Keywords List:", keywords_list)
+    print("Normalized Stopwords:", normalized_stopwords)
+    print("Filtered Keywords List:", filtered_keywords)
+
     # Verificamos si hay palabras clave después del filtrado
     if not filtered_keywords:
         print("Warning: No valid keywords after filtering. Skipping tag cloud generation.")
