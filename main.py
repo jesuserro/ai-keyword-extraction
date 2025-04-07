@@ -35,20 +35,39 @@ def generate_tag_cloud(keywords: str, output_path: str):
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
     keywords_list = [kw.strip() for kw in keywords_list if kw.strip()]  # Filtramos palabras vacías y espacios
 
+    # Eliminamos líneas no válidas como "### tags" o caracteres extraños
+    keywords_list = [kw for kw in keywords_list if not kw.lower().startswith("###")]
+
+    # Procesamos los valores de los tags para extraer solo el contenido después de ":"
+    processed_keywords = []
+    for kw in keywords_list:
+        if ":" in kw:  # Si es un tag con formato "clave: valor"
+            _, value = kw.split(":", 1)
+            processed_keywords.append(value.strip())  # Agregamos solo el valor
+        else:
+            processed_keywords.append(kw)  # Agregamos la palabra clave tal cual
+
     # Normalizamos las stop words (minúsculas y lematización)
     normalized_stopwords = {lemmatizer.lemmatize(word.lower()) for word in CUSTOM_STOPWORDS}
 
     # Filtramos stop words y lematizamos las palabras clave
-    filtered_keywords = [
-        lemmatizer.lemmatize(word.lower())  # Convertimos a minúsculas y lematizamos
-        for word in keywords_list
-        if lemmatizer.lemmatize(word.lower()) not in normalized_stopwords  # Comparamos con stop words normalizadas
-    ]
+    filtered_keywords = []
+    for word in processed_keywords:
+        # Mantener palabras con guiones como una sola unidad
+        if "-" in word:
+            normalized_word = "-".join([lemmatizer.lemmatize(w.lower()) for w in word.split("-")])
+        else:
+            normalized_word = lemmatizer.lemmatize(word.lower())
+
+        # Filtrar si la palabra normalizada no está en las stop words
+        if normalized_word not in normalized_stopwords:
+            filtered_keywords.append(normalized_word)
 
     # Depuración: Imprimir listas para verificar el filtrado
-    print("Original Keywords List:", keywords_list)
-    print("Normalized Stopwords:", normalized_stopwords)
-    print("Filtered Keywords List:", filtered_keywords)
+    print(f"\nOriginal Keywords List: {keywords_list}")
+    print(f"\nProcessed Keywords List: {processed_keywords}")
+    print(f"\nNormalized Stopwords: {normalized_stopwords}")
+    print(f"\nFiltered Keywords List: {filtered_keywords}")
 
     # Verificamos si hay palabras clave después del filtrado
     if not filtered_keywords:
