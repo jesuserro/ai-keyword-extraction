@@ -2,6 +2,8 @@
 
 Welcome to the **Keyword Extraction Project**, where we use the power of OpenAI's ChatCompletion API to extract keywords from any given text. This repository contains a simple Python script that demonstrates how to interact with the API and retrieve keywords efficiently.
 
+![Tag Cloud](img/tag_cloud.jpg)
+
 ## 🖥️ Example Output
 
 When running the script, you will see the following output in the terminal:
