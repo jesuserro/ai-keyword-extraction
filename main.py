@@ -18,7 +18,7 @@ KEYWORDS_PROMPT = [
     "Your task is to extract:",
     "1. The significant keywords from the blurb.",
     "2. Other meaningful tags (for example: the author, era, literary genre, country, if it is a classic).",
-    "The output (both keywords & tags) should be in an unordered markdown list, in English, lowercase, and spaces should be replaced with hyphens."
+    "The output (both 1. keywords & 2. tags) should be an 'unordered Markdown list', in English, lowercase, and spaces should be replaced with hyphens."
 ]
 
 # Parámetros de configuración para la llamada a la API
@@ -84,7 +84,7 @@ SYSTEM_PROMPT = [
     "You are an expert in literature and books.",
     "You will be provided with a blurb of a famous book.",
     "Your task is to suggest a list of related books along with their authors.",
-    "The output should be formatted as a list, where each entry is in the format: 'Title - Author'."
+    "The output should be formatted as a 'unordered markdown list', where each entry is in the format: 'Title (Author)'."
 ]
 
 def extract_related_books(text: str) -> str:
@@ -215,42 +215,37 @@ def main():
 
     # Llamamos a la función para extraer palabras clave
     extracted_keywords = extract_keywords(input_text)
-    print("\n🔑 **Extracted Keywords and Tags:**")
-    print("\n📌 **Keywords:**")
-    for keyword in extracted_keywords.split("keywords:")[-1].strip().split("\n- "):
-        if keyword:
-            print(f"   - {keyword}")
+    print("\n📌 Extracted Keywords and Tags:")
+    print(f"\n{extracted_keywords}")
 
     # Extraemos los tags de los keywords
     tags = parse_tags_from_keywords(extracted_keywords)
 
     # Llamamos a la función para obtener libros relacionados
     related_books = extract_related_books(input_text)
-    print("\n📚 **Related Books:**")
-    for book in related_books.split("\n"):
-        if book:
-            print(f"   {book}")
+    print("\n📚 Related Books:")
+    print(f"{related_books}")
 
     # Generamos la nube de palabras
     output_path_cloud = "img/tag_cloud.jpg"
     os.makedirs(os.path.dirname(output_path_cloud), exist_ok=True)
     generate_tag_cloud(extracted_keywords, output_path_cloud)
-    print(f"\n🌥️ **Tag cloud saved to:** {output_path_cloud}")
+    print(f"\n🌥️ Tag cloud saved to: {output_path_cloud}")
 
     # Generamos la gráfica de barras
     output_path_bar = "img/keyword_bar_chart.jpg"
     generate_bar_chart(extracted_keywords, output_path_bar)
-    print(f"\n📊 **Bar chart saved to:** {output_path_bar}")
+    print(f"📊 Bar chart saved to: {output_path_bar}")
 
     # Generamos la gráfica de pastel con los tags extraídos
     output_path_pie = "img/tag_pie_chart.jpg"
     generate_pie_chart(tags, output_path_pie)
-    print(f"\n🥧 **Pie chart saved to:** {output_path_pie}")
+    print(f"🥧 Pie chart saved to: {output_path_pie}")
 
     # Generamos scatter plot
     output_path_scatter = "img/keyword_scatter_plot.jpg"
     generate_scatter_plot(extracted_keywords, output_path_scatter)
-    print(f"\n📈 **Scatter plot saved to:** {output_path_scatter}")
+    print(f"📈 Scatter plot saved to: {output_path_scatter}")
 
 if __name__ == "__main__":
     main()
