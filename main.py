@@ -11,33 +11,51 @@ load_dotenv()
 # Configura tu API Key:
 openai.api_key = os.getenv("OPENAI_API_KEY")  # Alternativamente, puedes asignarla directamente aquí.
 
+# Definimos el contenido del mensaje como una constante
+KEYWORDS_PROMPT = [
+    "You are an expert in literature and books, particularly blurbs of classic works.",
+    "You will be provided with a blurb of a famous book.",
+    "Your task is to extract:",
+    "1. The significant keywords from the blurb.",
+    "2. Other meaningful tags (for example: the author, era, literary genre, country, if it is a classic).",
+    "The output (both keywords & tags) should be in an unordered markdown list, in English, lowercase, and spaces should be replaced with hyphens."
+]
+
+# Parámetros de configuración para la llamada a la API
+API_PARAMETERS = {
+    "model": "gpt-3.5-turbo",
+    "temperature": 0.3,
+    "max_tokens": 128
+}
+
 def extract_keywords(text: str) -> str:
     """
     Envía el texto a la API de OpenAI para extraer palabras clave.
     Retorna la lista de palabras clave propuesta por el modelo.
     """
-    # Aquí usamos la nueva endpoint ChatCompletion, con el modelo GPT-3.5 o GPT-4
+    # Unimos las condiciones del prompt en un solo string
+    system_content = " ".join(KEYWORDS_PROMPT)
+
+    # Llamada a la API de OpenAI
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model=API_PARAMETERS["model"],
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "You are an expert in literature and books, particularly blurbs of classic works. "
-                    "You will be provided with a blurb of a famous book. Your task is to extract: 1. the "
-                    "significant keywords from the blurb, "
-                    "and 2. other meaningful tags (for example: the author, era, literary genre, country, if it is a classic). The all output (keywords & tags) should be in English, lowercase, and "
-                    "spaces should be replaced with hyphens."
-                )
+                "content": system_content
             },
             {
                 "role": "user",
                 "content": text
             }
         ],
-        temperature=0.3,
-        max_tokens=128
+        temperature=API_PARAMETERS["temperature"],
+        max_tokens=API_PARAMETERS["max_tokens"]
     )
+
+    # El texto devuelto por el modelo:
+    keywords = response["choices"][0]["message"]["content"].strip()
+    return keywords
 
     # El texto devuelto por el modelo:
     keywords = response["choices"][0]["message"]["content"].strip()
@@ -61,20 +79,27 @@ def generate_tag_cloud(keywords: str, output_path: str):
     plt.savefig(output_path, format="jpg")
     plt.close()
 
+# Definimos el contenido del mensaje como una constante
+SYSTEM_PROMPT = [
+    "You are an expert in literature and books.",
+    "You will be provided with a blurb of a famous book.",
+    "Your task is to suggest a list of related books along with their authors.",
+    "The output should be formatted as a list, where each entry is in the format: 'Title - Author'."
+]
+
 def extract_related_books(text: str) -> str:
     """
     Envía el texto a la API de OpenAI para obtener un listado de libros relacionados con su autor.
     """
+    # Unimos las condiciones del prompt en un solo string
+    system_content = " ".join(SYSTEM_PROMPT)
+
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "You are an expert in literature and books. You will be provided with a blurb of a famous book. "
-                    "Your task is to suggest a list of related books along with their authors. The output should be "
-                    "formatted as a list, where each entry is in the format: 'Title - Author'."
-                )
+                "content": system_content
             },
             {
                 "role": "user",
@@ -198,16 +223,13 @@ def main():
 
     # Extraemos los tags de los keywords
     tags = parse_tags_from_keywords(extracted_keywords)
-    print("\n🏷️ **Tags:**")
-    for key, value in tags.items():
-        print(f"   - {key}: {value}")
 
     # Llamamos a la función para obtener libros relacionados
     related_books = extract_related_books(input_text)
     print("\n📚 **Related Books:**")
     for book in related_books.split("\n"):
         if book:
-            print(f"   - {book}")
+            print(f"   {book}")
 
     # Generamos la nube de palabras
     output_path_cloud = "img/tag_cloud.jpg"
