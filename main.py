@@ -187,7 +187,7 @@ def extract_related_books(text: str) -> str:
 
 def generate_bar_chart(keywords: str, output_path: str):
     """
-    Genera una gráfica de barras con las palabras clave y sus frecuencias reales.
+    Genera una gráfica de barras mejorada con las palabras clave y sus frecuencias reales.
     """
     # Procesamos las palabras clave
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
@@ -199,13 +199,19 @@ def generate_bar_chart(keywords: str, output_path: str):
     # Creamos un DataFrame con las frecuencias
     df = pd.DataFrame({'Keyword': keyword_counts.index, 'Frequency': keyword_counts.values})
 
-    # Generamos la gráfica de barras
+    # Generamos la gráfica de barras mejorada
     plt.figure(figsize=(12, 6))
-    df.plot(kind='bar', x='Keyword', y='Frequency', legend=False, color='skyblue')
-    plt.title('Keyword Frequency')
-    plt.xlabel('Keywords')
-    plt.ylabel('Frequency')
-    plt.xticks(rotation=45, ha='right')
+    bars = plt.bar(df['Keyword'], df['Frequency'], color='skyblue', edgecolor='black')
+    plt.title('Keyword Frequency', fontsize=16)
+    plt.xlabel('Keywords', fontsize=14)
+    plt.ylabel('Frequency', fontsize=14)
+    plt.xticks(rotation=45, ha='right', fontsize=12)
+
+    # Agregamos etiquetas de valores encima de las barras
+    for bar in bars:
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() - 0.5,
+                 str(bar.get_height()), ha='center', va='bottom', fontsize=10, color='black')
+
     plt.tight_layout()
 
     # Guardamos la gráfica
@@ -214,7 +220,7 @@ def generate_bar_chart(keywords: str, output_path: str):
 
 def generate_pie_chart(tags: dict, output_path: str):
     """
-    Genera una gráfica de pastel con las categorías extraídas y sus pesos proporcionales.
+    Genera una gráfica de pastel mejorada con las categorías extraídas y sus pesos proporcionales.
     """
     # Creamos etiquetas y valores basados en la longitud de los valores de los tags
     labels = list(tags.keys())
@@ -225,10 +231,17 @@ def generate_pie_chart(tags: dict, output_path: str):
         print("Warning: No valid data for pie chart. Skipping generation.")
         return
 
-    # Generamos la gráfica de pastel
+    # Generamos la gráfica de pastel mejorada
     plt.figure(figsize=(8, 8))
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=plt.cm.Paired.colors)
-    plt.title('Tag Distribution')
+    colors = plt.cm.Paired.colors  # Colores atractivos
+    wedges, texts, autotexts = plt.pie(
+        sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors,
+        textprops={'fontsize': 12}, pctdistance=0.85
+    )
+
+    # Mejoramos el diseño
+    plt.setp(autotexts, size=10, weight="bold", color="white")
+    plt.title('Tag Distribution', fontsize=16)
     plt.tight_layout()
 
     # Guardamos la gráfica
@@ -237,7 +250,7 @@ def generate_pie_chart(tags: dict, output_path: str):
 
 def generate_scatter_plot(keywords: str, output_path: str):
     """
-    Genera una gráfica de dispersión con las palabras clave y su relevancia basada en la longitud.
+    Genera una gráfica de dispersión mejorada con las palabras clave y su relevancia basada en la longitud.
     """
     # Procesamos las palabras clave
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
@@ -247,13 +260,19 @@ def generate_scatter_plot(keywords: str, output_path: str):
     x = range(len(keywords_list))
     y = [len(kw) for kw in keywords_list]  # Usamos la longitud de las palabras como relevancia
 
-    # Generamos la gráfica de dispersión
+    # Generamos la gráfica de dispersión mejorada
     plt.figure(figsize=(12, 6))
-    plt.scatter(x, y, color='blue', alpha=0.7)
-    plt.title('Keyword Relevance')
-    plt.xlabel('Keyword Index')
-    plt.ylabel('Relevance (Length)')
-    plt.xticks(x, keywords_list, rotation=45, ha='right')
+    plt.scatter(x, y, color='blue', alpha=0.7, edgecolor='black', s=100)
+    plt.title('Keyword Relevance', fontsize=16)
+    plt.xlabel('Keyword Index', fontsize=14)
+    plt.ylabel('Relevance (Length)', fontsize=14)
+    plt.xticks(x, keywords_list, rotation=45, ha='right', fontsize=12)
+
+    # Agregamos etiquetas a los puntos más relevantes
+    for i, kw in enumerate(keywords_list):
+        if y[i] > 5:  # Etiquetamos solo palabras clave con longitud mayor a 5
+            plt.text(i, y[i] + 0.2, kw, fontsize=10, ha='center')
+
     plt.tight_layout()
 
     # Guardamos la gráfica
