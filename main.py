@@ -251,6 +251,7 @@ def generate_pie_chart(tags: dict, output_path: str):
 def generate_scatter_plot(keywords: str, output_path: str):
     """
     Genera una gráfica de dispersión mejorada con las palabras clave y su relevancia basada en la longitud.
+    Incluye líneas de cuadrícula para mayor claridad.
     """
     # Procesamos las palabras clave
     keywords_list = keywords.split("keywords:")[-1].strip().split("\n- ")
@@ -268,10 +269,13 @@ def generate_scatter_plot(keywords: str, output_path: str):
     plt.ylabel('Relevance (Length)', fontsize=14)
     plt.xticks(x, keywords_list, rotation=45, ha='right', fontsize=12)
 
+    # Añadimos líneas de cuadrícula en color gris
+    plt.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.7)
+
     # Agregamos etiquetas a los puntos más relevantes
     for i, kw in enumerate(keywords_list):
         if y[i] > 5:  # Etiquetamos solo palabras clave con longitud mayor a 5
-            plt.text(i, y[i] + 0.2, kw, fontsize=10, ha='center')
+            plt.text(i, y[i] + 0.5, kw, fontsize=10, ha='center')
 
     plt.tight_layout()
 
